@@ -1,0 +1,11 @@
+description: >-
+  Provides the token that can be used to uniquely identify the session in the
+  bank statement.
+cmds:
+  getBankSessionToken:
+    description: >-
+      Returns the token that.
+    result: 
+      description: token
+      type: object
+      $ref: bank_transaction#/BankSessionToken

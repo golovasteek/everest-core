@@ -1,0 +1,73 @@
+description: Types to provide the session price
+types:
+  SessionCostChunk:
+    description: >-
+      A chunk of the session cost. The total cost of the session is the sum of
+      all chunks.
+    type: object
+    additionalProperties: false
+    properties:
+      timestamp_from:
+        description: >-
+          Absolute timestamp for the start of this chunk in RFC3339 UTC format
+        type: string
+        format: date-time
+      timestamp_to:
+        description: >-
+          Absolute timestamp for the end of this chunk in RFC3339 UTC format
+        type: string
+        format: date-time
+      cost_energy:
+        description: >-
+          Cost of the energy consumed during this chunk in the currency
+          specified in the session price
+        type: number
+      cost_time:
+        description: >-
+          Cost of the time spent during this chunk in the currency specified
+          in the session price
+        type: number
+  SessionStatus:
+    description: >-
+      Session status enum. Session can be running or finished. Costs of the
+      running session are not final and can change.
+    type: string
+    enum:
+      - running
+      - finished
+  SessionCost:
+    description: >-
+      Session cost object containing the total cost of the session and a list
+      of chunks
+    type: object
+    additionalProperties: false
+    required:
+      - total_cost
+      - currency
+      - cost_chunks
+    properties:
+      id_tag:
+        description: The id tag assigned to this transaction
+        type: object
+        $ref: /authorization#/ProvidedIdToken
+      total_cost:
+        description: >-
+          Total cost of the session in the currency specified in the session
+          price
+        type: number
+      currency:
+        description: >-
+          Currency in 3 digit ISO 4217. This is the currency used for all
+          cost values in this object
+        type: string
+        minLength: 3
+        maxLength: 3
+      cost_chunks:
+        description: >-
+          List of cost chunks. The total cost of the session is the sum of
+          all chunks.
+        type: array
+        items:
+          description: One chunk of the session cost
+          type: object
+          $ref: /session_price#/SessionCostChunk  

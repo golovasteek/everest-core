@@ -1,0 +1,34 @@
+description: >-
+  Types needed for bookkeeping bank transactions
+types:
+  BankSessionToken:
+    description: >-
+      In Germany (an probably other countries) we have to provide a token
+      to the bank, so that customer can identify the transaction from their
+      bank statement. This token can be used to download the invoices.
+    type: object
+    additionalProperties: false
+    properties:
+      token:
+        description: >-
+          Arbitrary token string. Typically short string that is printable case insensitive
+          ascii.
+        type: string
+  BankTransactionSummary:
+    description: >-
+      Summary of a bank transaction. Depends on bank and the backend. Therefore
+      it's mostly opque data at the moment.
+    type: object
+    additionalProperties: false
+    properties:
+      session_token:
+        description: >-
+          Token to identify the session. This token can be used to download the
+          invoices.
+        type: object
+        $ref: bank_transaction#/BankSessionToken
+      transaction_data:
+        description: >-
+          Arbitrary data that is needed to identify the transaction. This is
+          mostly opque data at the moment.
+        type: string
