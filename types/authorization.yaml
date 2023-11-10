@@ -137,6 +137,7 @@ types:
       - RFID
       - Autocharge
       - PlugAndCharge
+      - git Card
   IdTokenType:
     description: >-
       IdTokenType of the provided token
