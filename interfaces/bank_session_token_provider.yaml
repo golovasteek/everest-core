@@ -2,7 +2,7 @@ description: >-
   Provides the token that can be used to uniquely identify the session in the
   bank statement.
 cmds:
-  getBankSessionToken:
+  get_bank_session_token:
     description: >-
       Returns the token that.
     result: 
