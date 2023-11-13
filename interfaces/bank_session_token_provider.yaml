@@ -4,8 +4,8 @@ description: >-
 cmds:
   get_bank_session_token:
     description: >-
-      Returns the token that.
+      Returns the token.
     result: 
       description: token
       type: object
-      $ref: bank_transaction#/BankSessionToken
+      $ref: /bank_transaction#/BankSessionToken

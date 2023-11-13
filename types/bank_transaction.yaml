@@ -26,7 +26,7 @@ types:
           Token to identify the session. This token can be used to download the
           invoices.
         type: object
-        $ref: bank_transaction#/BankSessionToken
+        $ref: /bank_transaction#/BankSessionToken
       transaction_data:
         description: >-
           Arbitrary data that is needed to identify the transaction. This is
