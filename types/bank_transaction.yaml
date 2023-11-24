@@ -3,9 +3,7 @@ description: >-
 types:
   BankSessionToken:
     description: >-
-      In Germany (and probably other countries) we have to provide a token
-      to the bank, so that customer can identify the transaction from their
-      bank statement. This token can be used to download the invoices.
+      In some setups the unique token needs to be provided in the bank statement.
     type: object
     additionalProperties: false
     properties:
