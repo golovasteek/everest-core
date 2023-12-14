@@ -1,7 +1,7 @@
 description: >-
   The definition of the currency and price types.
 types:
-  Currency:
+  CurrencyCode:
     description: >-
       Currency in 3 alphabetical characters according to ISO 4217.
       The list of values is taken from the https://www.six-group.com/en/products-services/financial-information/data-standards.html
@@ -195,8 +195,7 @@ types:
       # 376, New Israeli Sheqel, ISRAEL
       - ILS
       # 356, Indian Rupee, BHUTAN
-      - INR
-      # 356, Indian Rupee, INDIA
+      # INDIA
       - INR
       # 368, Iraqi Dinar, IRAQ
       - IQD
@@ -457,25 +456,20 @@ types:
       - ZMW
       # 932, Zimbabwe Dollar, ZIMBABWE
       - ZWL
-  Price:
+  Currency:
     description: >-
-      Price is expressed as an amount of minor units of the currency.
-      In ISO 4217 this is the number of digits after the decimal separator that
-      are expressed by the minor units of the currency.
-      And we use it here as well.
-      Example price of 1.23 EUR is expressed as:
-        value: 123
-        decimals: 2
+      Currency object containing the currency code and the accuracy of the minor
+      unit according to ISO 4217.
     type: object
     additionalProperties: false
     required:
-      - value
-      - decimals
+      - code
     properties:
-      value:
+      code:
         description: >-
-          The amount of minor units of the currency. 
-        type: integer
+          Currency code.
+        type: string
+        $ref: /money#/CurrencyCode
       decimals:
         description: >-
           The number of digits after the decimal separator, that are expressed
@@ -487,3 +481,35 @@ types:
         type: integer
         minimum: 0
         default: 2
+  Value:
+    description: >-
+      Price is expressed as an amount of minor units of the currency.
+      Example price of 1.23 EUR is expressed as { value: 123 }
+    type: object
+    additionalProperties: false
+    required:
+      - value
+    properties:
+      value:
+        description: >-
+          The amount of minor units of the currency. 
+        type: integer
+  Price:
+    description: >-
+      Price object containing the currency and the value of money.
+    type: object
+    additionalProperties: false
+    required:
+      - currency
+      - value
+    properties:
+      currency:
+        description: >-
+          Currency of the price.
+        type: object
+        $ref: /money#/Currency
+      value:
+        description: >-
+          Value in the minor units of the currency.
+        type: object
+        $ref: /money#/Value
