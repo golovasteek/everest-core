@@ -22,7 +22,7 @@ types:
           Cost of the energy consumed during this chunk in the currency
           specified in the session price
         type: object
-        $ref: /price#/Price
+        $ref: /money#/Value
       category:
         description: >-
           Cost category. Typically this is energy or time.
@@ -58,7 +58,7 @@ types:
         description: >-
           Currency of the session cost. It applies to all chunks.
         type: object
-        $ref: /price#/Currency
+        $ref: /money#/Currency
       cost_chunks:
         description: >-
           List of cost chunks. The total cost of the session is the sum of
