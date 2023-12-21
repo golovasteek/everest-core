@@ -1,5 +1,5 @@
 description: >-
-  This interface defines an AC Residual Current Monitor (RCD). Actual emergency switch off is done in HW directly,
+  This interface provides an AC Residual Current Monitor (RCD). Actual emergency switch off is done in HW directly,
   but this interface allows some control and telemetry.
 cmds:
   self_test:

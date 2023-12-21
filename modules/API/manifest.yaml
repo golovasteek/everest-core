@@ -61,8 +61,8 @@ config:
     type: integer
     default: 2
     minimum: 0
-  hw_caps_max_gun_temperature_C_decimal_places:
-    description: Maximum number of decimal places for max_gun_temperature_C in the hardware capabilities
+  hw_caps_max_plug_temperature_C_decimal_places:
+    description: Maximum number of decimal places for max_plug_temperature_C in the hardware capabilities
     type: integer
     default: 2
     minimum: 0
@@ -91,7 +91,7 @@ config:
     type: integer
     default: 2
     minimum: 0
-  telemetry_gun_temperature_C_decimal_places:
+  telemetry_plug_temperature_C_decimal_places:
     description: Maximum number of decimal places for RCD current in telemetry
     type: integer
     default: 2
@@ -140,8 +140,8 @@ config:
     description: Round minimum import current in hardware limits to the nearest step. Ignored if value is 0
     type: number
     default: 0
-  hw_caps_max_gun_temperature_C_round_to:
-    description: Round max_gun_temperature_C in hardware limits to the nearest step. Ignored if value is 0
+  hw_caps_max_plug_temperature_C_round_to:
+    description: Round max_plug_temperature_C in hardware limits to the nearest step. Ignored if value is 0
     type: number
     default: 0
   limits_max_current_round_to:
@@ -164,8 +164,8 @@ config:
     description: Round supply voltage -12V in telemetry to the nearest step. Ignored if value is 0
     type: number
     default: 0
-  telemetry_gun_temperature_C_round_to:
-    description: Round gun_temperature_C in telemetry to the nearest step. Ignored if value is 0
+  telemetry_plug_temperature_C_round_to:
+    description: Round plug_temperature_C in telemetry to the nearest step. Ignored if value is 0
     type: number
     default: 0
 provides:

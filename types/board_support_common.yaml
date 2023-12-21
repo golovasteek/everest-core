@@ -2,7 +2,7 @@ description: EV and EVSE board support types
 types:
   BspEvent:
     description: >-
-      Event stream from ControlPilot signal/Relais.
+      Event stream from ControlPilot signal/relais.
 
       A-F: CP states as defined in IEC61851-1
       PowerOn: Hardware confirms that contactors switched on correctly (typically mirror contacts indicated successful switch on)

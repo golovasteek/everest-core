@@ -68,7 +68,7 @@ public:
     explicit IECStateMachine(const std::unique_ptr<evse_board_supportIntf>& r_bsp);
 
     // Call when new events from BSP requirement come in. Will signal internal events
-    void process_bsp_event(types::board_support_common::BspEvent bsp_event);
+    void process_bsp_event(const types::board_support_common::BspEvent bsp_event);
     // Allow power on from Charger state machine
     void allow_power_on(bool value, types::evse_board_support::Reason reason);
 
@@ -110,7 +110,7 @@ private:
     RawCPState cp_state{RawCPState::Disabled}, last_cp_state{RawCPState::Disabled};
     AsyncTimeout timeout_state_c1;
 
-    std::mutex state_mutex;
+    std::mutex state_machine_mutex;
     void feed_state_machine();
     std::queue<CPEvent> state_machine();
 

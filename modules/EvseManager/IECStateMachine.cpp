@@ -8,6 +8,12 @@
 
 namespace module {
 
+// helper type for visitor
+template <class... Ts> struct overloaded : Ts... {
+    using Ts::operator()...;
+};
+template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
 static std::variant<RawCPState, CPEvent> from_bsp_event(types::board_support_common::Event e) {
     switch (e) {
     case types::board_support_common::Event::A:
@@ -74,20 +80,19 @@ IECStateMachine::IECStateMachine(const std::unique_ptr<evse_board_supportIntf>& 
     });
 }
 
-void IECStateMachine::process_bsp_event(types::board_support_common::BspEvent bsp_event) {
-
+void IECStateMachine::process_bsp_event(const types::board_support_common::BspEvent bsp_event) {
     auto event = from_bsp_event(bsp_event.event);
-
-    // If it was a CP change: feed state machine, else forward error
-    if (std::holds_alternative<RawCPState>(event)) {
-        {
-            std::lock_guard l(state_mutex);
-            cp_state = std::get<RawCPState>(event);
-        }
-        feed_state_machine();
-    } else {
-        signal_event(std::get<CPEvent>(event));
-    }
+    std::visit(overloaded{[this](RawCPState& raw_state) {
+                              // If it is a raw CP state, run it through the state machine
+                              {
+                                  std::lock_guard l(state_machine_mutex);
+                                  cp_state = raw_state;
+                              }
+                              feed_state_machine();
+                          },
+                          // If it is another CP event, pass through
+                          [this](CPEvent& event) { signal_event(event); }},
+               event);
 }
 
 void IECStateMachine::feed_state_machine() {
@@ -107,7 +112,7 @@ void IECStateMachine::feed_state_machine() {
 std::queue<CPEvent> IECStateMachine::state_machine() {
 
     std::queue<CPEvent> events;
-    std::lock_guard lock(state_mutex);
+    std::lock_guard lock(state_machine_mutex);
 
     switch (cp_state) {
 
@@ -177,6 +182,8 @@ std::queue<CPEvent> IECStateMachine::state_machine() {
             break;
         }
         // no break, intended fall through: If we support state D it is handled the same way as state C
+        [[fallthrough]];
+
     case RawCPState::C:
         connector_lock();
         // Table A.6: Sequence 1.2 Plug-in
@@ -184,8 +191,7 @@ std::queue<CPEvent> IECStateMachine::state_machine() {
             events.push(CPEvent::CarPluggedIn);
             EVLOG_info << "Detected simplified mode.";
             ev_simplified_mode = true;
-        }
-        if (last_cp_state == RawCPState::B) {
+        } else if (last_cp_state == RawCPState::B) {
             events.push(CPEvent::CarRequestedPower);
         }
 
@@ -259,7 +265,7 @@ std::queue<CPEvent> IECStateMachine::state_machine() {
 // High level state machine sets PWM duty cycle
 void IECStateMachine::set_pwm(double value) {
     {
-        std::scoped_lock lock(state_mutex);
+        std::scoped_lock lock(state_machine_mutex);
         if (value > 0 && value < 1) {
             pwm_running = true;
         } else {
@@ -274,7 +280,7 @@ void IECStateMachine::set_pwm(double value) {
 // High level state machine sets state X1
 void IECStateMachine::set_pwm_off() {
     {
-        std::scoped_lock lock(state_mutex);
+        std::scoped_lock lock(state_machine_mutex);
         pwm_running = false;
     }
     r_bsp->call_pwm_off();
@@ -284,7 +290,7 @@ void IECStateMachine::set_pwm_off() {
 // High level state machine sets state F
 void IECStateMachine::set_pwm_F() {
     {
-        std::scoped_lock lock(state_mutex);
+        std::scoped_lock lock(state_machine_mutex);
         pwm_running = false;
     }
     r_bsp->call_pwm_F();
@@ -294,7 +300,7 @@ void IECStateMachine::set_pwm_F() {
 // The higher level state machine in Charger.cpp calls this to indicate it allows contactors to be switched on
 void IECStateMachine::allow_power_on(bool value, types::evse_board_support::Reason reason) {
     {
-        std::scoped_lock lock(state_mutex);
+        std::scoped_lock lock(state_machine_mutex);
         // Only set the flags here in case of power on.
         power_on_allowed = value;
         power_on_reason = reason;

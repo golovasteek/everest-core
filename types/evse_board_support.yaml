@@ -57,7 +57,7 @@ types:
           Indicates whether changing number of phases is supported during
           charging (true) or not (false)
         type: boolean
-      max_gun_temperature_C:
+      max_plug_temperature_C:
         type: number
       connector_type:
         description: Type of charging connector available at this EVSE
@@ -79,8 +79,8 @@ types:
       evse_temperature_C:
         description: Current temperature of the EVSE in degree celsius
         type: number
-      gun_temperature_C:
-        description: Current temperature of the gun in degree celsius
+      plug_temperature_C:
+        description: Current temperature of the plug in degree celsius
         type: number
       fan_rpm:
         description: RPM of the fan. 0 if off or no fan available.
