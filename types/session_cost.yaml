@@ -73,7 +73,7 @@ types:
         description: >-
           Session status. Session can be running or finished. Costs of the
           running session are not final and can change.
-          Only afeter the session is finished, the session cost can be commited
+          Only after the session is finished, the session cost can be committed
           to bank and/or backend.
         type: object
         $ref: /session_cost#/SessionStatus
