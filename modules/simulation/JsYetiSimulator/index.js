@@ -125,6 +125,12 @@ boot_module(async ({
     let amp = { ampacity: read_pp_ampacity(mod) };
     return amp;
   });
+  setup.provides.connector_lock.register.lock((mod, args) => {
+    evlog.info('Lock connector');
+  });
+  setup.provides.connector_lock.register.unlock((mod, args) => {
+    evlog.info('Unlock connector');
+  });
 
   // Subscribe to nodered error injection
   mqtt.subscribe(`everest_external/nodered/${config.module.connector_id}/carsim/error`, (mod, en) => {
