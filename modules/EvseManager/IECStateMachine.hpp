@@ -76,7 +76,7 @@ public:
     void evse_replug(int ms);
     void switch_three_phases_while_charging(bool n);
     void setup(bool three_phases, bool has_ventilation, std::string country_code);
-    bool force_unlock();
+
     void set_overcurrent_limit(double amps);
 
     void set_pwm(double value);
@@ -85,8 +85,13 @@ public:
 
     void enable(bool en);
 
+    void connector_lock();
+    void connector_unlock();
+
     // Signal for internal events type
     sigslot::signal<CPEvent> signal_event;
+    sigslot::signal<> signal_lock;
+    sigslot::signal<> signal_unlock;
 
 private:
     const std::unique_ptr<evse_board_supportIntf>& r_bsp;
@@ -113,6 +118,7 @@ private:
     void call_allow_power_on_bsp(bool value);
 
     std::atomic_bool three_phases{true};
+    std::atomic_bool locked{false};
 };
 
 } // namespace module

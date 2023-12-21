@@ -396,11 +396,8 @@ bool evse_managerImpl::handle_external_ready_to_start_charging() {
 }
 
 bool evse_managerImpl::handle_force_unlock(int& connector_id) {
-    if (mod->r_connector_lock.size() > 0) {
-        mod->r_connector_lock[0]->call_unlock();
-        return true;
-    }
-    return false;
+    mod->bsp->connector_unlock();
+    return true;
 };
 
 } // namespace evse

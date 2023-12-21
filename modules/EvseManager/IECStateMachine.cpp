@@ -118,6 +118,7 @@ std::queue<CPEvent> IECStateMachine::state_machine() {
             ev_simplified_mode = false;
             timeout_state_c1.stop();
             call_allow_power_on_bsp(false);
+            connector_unlock();
         }
         break;
 
@@ -129,6 +130,7 @@ std::queue<CPEvent> IECStateMachine::state_machine() {
             car_plugged_in = false;
             call_allow_power_on_bsp(false);
             timeout_state_c1.stop();
+            connector_unlock();
         }
 
         // Table A.6: Sequence 2.1 Unplug at state Bx (or any other
@@ -142,6 +144,7 @@ std::queue<CPEvent> IECStateMachine::state_machine() {
         // Table A.6: Sequence 7 EV stops charging
         // Table A.6: Sequence 8.2 EV supply equipment
         // responds to EV opens S2 (w/o PWM)
+        connector_lock();
 
         if (last_cp_state != RawCPState::A && last_cp_state != RawCPState::B) {
 
@@ -166,6 +169,7 @@ std::queue<CPEvent> IECStateMachine::state_machine() {
         break;
 
     case RawCPState::D:
+        connector_lock();
         // If state D is not supported switch off.
         if (not has_ventilation) {
             call_allow_power_on_bsp(false);
@@ -174,6 +178,7 @@ std::queue<CPEvent> IECStateMachine::state_machine() {
         }
         // no break, intended fall through: If we support state D it is handled the same way as state C
     case RawCPState::C:
+        connector_lock();
         // Table A.6: Sequence 1.2 Plug-in
         if (last_cp_state == RawCPState::A || (!car_plugged_in && last_cp_state == RawCPState::F)) {
             events.push(CPEvent::CarPluggedIn);
@@ -230,6 +235,7 @@ std::queue<CPEvent> IECStateMachine::state_machine() {
         break;
 
     case RawCPState::E:
+        connector_unlock();
         if (last_cp_state != RawCPState::E) {
             timeout_state_c1.stop();
             call_allow_power_on_bsp(false);
@@ -237,6 +243,7 @@ std::queue<CPEvent> IECStateMachine::state_machine() {
         break;
 
     case RawCPState::F:
+        connector_unlock();
         timeout_state_c1.stop();
         call_allow_power_on_bsp(false);
         break;
@@ -363,6 +370,20 @@ void IECStateMachine::set_overcurrent_limit(double amps) {
     if (amps != last_amps) {
         r_bsp->call_ac_set_overcurrent_limit_A(amps);
         last_amps = amps;
+    }
+}
+
+void IECStateMachine::connector_lock() {
+    if (not locked) {
+        signal_lock();
+        locked = true;
+    }
+}
+
+void IECStateMachine::connector_unlock() {
+    if (locked) {
+        signal_unlock();
+        locked = false;
     }
 }
 

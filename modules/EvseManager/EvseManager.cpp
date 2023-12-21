@@ -109,6 +109,11 @@ void EvseManager::ready() {
 
     charger = std::unique_ptr<Charger>(new Charger(bsp, error_handling, hw_capabilities.connector_type));
 
+    if (r_connector_lock.size() > 0) {
+        bsp->signal_lock.connect([this]() { r_connector_lock[0]->call_lock(); });
+        bsp->signal_unlock.connect([this]() { r_connector_lock[0]->call_unlock(); });
+    }
+
     if (get_hlc_enabled()) {
 
         // Set up EVSE ID
