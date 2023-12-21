@@ -70,26 +70,6 @@ void EvseManager::init() {
     if (config.charge_mode == "DC" && r_imd.empty()) {
         EVLOG_warning << "DC mode without isolation monitoring configured, please check your national regulations.";
     }
-    if (r_ac_rcd.size() > 0) {
-        r_ac_rcd[0]->subscribe_fault_ac([this] {
-            session_log.evse(true, "RCD: AC Fault");
-            // Inform charger
-            charger->set_rcd_error();
-            // Inform HLC
-            if (hlc_enabled) {
-                r_hlc[0]->call_send_error(types::iso15118_charger::EvseError::Error_RCD);
-            }
-        });
-        r_ac_rcd[0]->subscribe_fault_dc([this] {
-            session_log.evse(true, "RCD: DC Fault");
-            // Inform charger
-            charger->set_rcd_error();
-            // Inform HLC
-            if (hlc_enabled) {
-                r_hlc[0]->call_send_error(types::iso15118_charger::EvseError::Error_RCD);
-            }
-        });
-    }
 
     reserved = false;
     reservation_id = 0;
@@ -103,7 +83,7 @@ void EvseManager::init() {
 
 void EvseManager::ready() {
     bsp = std::unique_ptr<IECStateMachine>(new IECStateMachine(r_bsp));
-    error_handling = std::unique_ptr<ErrorHandling>(new ErrorHandling(r_bsp, r_hlc));
+    error_handling = std::unique_ptr<ErrorHandling>(new ErrorHandling(r_bsp, r_hlc, r_connector_lock, r_ac_rcd));
 
     hw_capabilities = r_bsp->call_get_hw_capabilities();
 

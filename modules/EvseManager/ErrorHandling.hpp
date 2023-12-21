@@ -22,6 +22,8 @@
 #include <queue>
 
 #include <generated/interfaces/ISO15118_charger/Interface.hpp>
+#include <generated/interfaces/ac_rcd/Interface.hpp>
+#include <generated/interfaces/connector_lock/Interface.hpp>
 #include <generated/interfaces/evse_board_support/Interface.hpp>
 #include <generated/interfaces/evse_manager/Interface.hpp>
 #include <sigslot/signal.hpp>
@@ -55,12 +57,31 @@ struct ActiveErrors {
         std::atomic_bool MREC24ConnectorVoltageHigh{false};
         std::atomic_bool MREC25BrokenLatch{false};
         std::atomic_bool MREC26CutCable{false};
+        std::atomic_bool VendorError{false};
     } bsp;
 
     struct evse_manager_errors {
         std::atomic_bool MREC4OverCurrentFailure{false};
         std::atomic_bool Internal{false};
     } evse_manager;
+
+    struct ac_rcd_errors {
+        std::atomic_bool MREC2GroundFailure{false};
+        std::atomic_bool VendorError{false};
+        std::atomic_bool Selftest{false};
+        std::atomic_bool AC{false};
+        std::atomic_bool DC{false};
+    } ac_rcd;
+
+    struct connector_lock_errors {
+        std::atomic_bool ConnectorLockCapNotCharged{false};
+        std::atomic_bool ConnectorLockUnexpectedOpen{false};
+        std::atomic_bool ConnectorLockUnexpectedClose{false};
+        std::atomic_bool ConnectorLockFailedLock{false};
+        std::atomic_bool ConnectorLockFailedUnlock{false};
+        std::atomic_bool MREC1ConnectorLockFailure{false};
+        std::atomic_bool VendorError{false};
+    } connector_lock;
 
     bool all_cleared() {
         return not(bsp.DiodeFault or bsp.VentilationNotAvailable or bsp.BrownOut or bsp.EnergyManagement or
@@ -69,7 +90,12 @@ struct ActiveErrors {
                    bsp.MREC10InvalidVehicleMode or bsp.MREC14PilotFault or bsp.MREC15PowerLoss or
                    bsp.MREC17EVSEContactorFault or bsp.MREC19CableOverTempStop or bsp.MREC20PartialInsertion or
                    bsp.MREC23ProximityFault or bsp.MREC24ConnectorVoltageHigh or bsp.MREC25BrokenLatch or
-                   bsp.MREC26CutCable or evse_manager.MREC4OverCurrentFailure or evse_manager.Internal);
+                   bsp.MREC26CutCable or evse_manager.MREC4OverCurrentFailure or evse_manager.Internal or
+                   ac_rcd.MREC2GroundFailure or ac_rcd.VendorError or ac_rcd.Selftest or ac_rcd.AC or ac_rcd.DC or
+                   connector_lock.ConnectorLockCapNotCharged or connector_lock.ConnectorLockUnexpectedOpen or
+                   connector_lock.ConnectorLockUnexpectedClose or connector_lock.ConnectorLockFailedLock or
+                   connector_lock.ConnectorLockFailedUnlock or connector_lock.MREC1ConnectorLockFailure or
+                   connector_lock.VendorError);
     }
 };
 
@@ -77,7 +103,9 @@ class ErrorHandling {
 public:
     // We need the r_bsp reference to be able to talk to the bsp driver module
     explicit ErrorHandling(const std::unique_ptr<evse_board_supportIntf>& r_bsp,
-                           const std::vector<std::unique_ptr<ISO15118_chargerIntf>>& r_hlc);
+                           const std::vector<std::unique_ptr<ISO15118_chargerIntf>>& r_hlc,
+                           const std::vector<std::unique_ptr<connector_lockIntf>>& r_connector_lock,
+                           const std::vector<std::unique_ptr<ac_rcdIntf>>& r_ac_rcd);
 
     // Signal for internal events type
     sigslot::signal<> signal_error;
@@ -92,8 +120,13 @@ public:
 private:
     const std::unique_ptr<evse_board_supportIntf>& r_bsp;
     const std::vector<std::unique_ptr<ISO15118_chargerIntf>>& r_hlc;
+    const std::vector<std::unique_ptr<connector_lockIntf>>& r_connector_lock;
+    const std::vector<std::unique_ptr<ac_rcdIntf>>& r_ac_rcd;
 
     bool modify_error_bsp(const Everest::error::Error& error, bool active);
+    bool modify_error_connector_lock(const Everest::error::Error& error, bool active);
+    bool modify_error_ac_rcd(const Everest::error::Error& error, bool active);
+
     bool modify_error_evse_manager(const std::string& error_type, bool active);
     bool hlc{false};
 

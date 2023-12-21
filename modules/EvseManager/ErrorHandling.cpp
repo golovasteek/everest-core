@@ -6,14 +6,16 @@
 namespace module {
 
 ErrorHandling::ErrorHandling(const std::unique_ptr<evse_board_supportIntf>& _r_bsp,
-                             const std::vector<std::unique_ptr<ISO15118_chargerIntf>>& _r_hlc) :
-    r_bsp(_r_bsp), r_hlc(_r_hlc) {
+                             const std::vector<std::unique_ptr<ISO15118_chargerIntf>>& _r_hlc,
+                             const std::vector<std::unique_ptr<connector_lockIntf>>& _r_connector_lock,
+                             const std::vector<std::unique_ptr<ac_rcdIntf>>& _r_ac_rcd) :
+    r_bsp(_r_bsp), r_hlc(_r_hlc), r_connector_lock(_r_connector_lock), r_ac_rcd(_r_ac_rcd) {
 
     if (r_hlc.size() > 0) {
         hlc = true;
     }
 
-    // Subscribe to bsp driver to receive BspEvents from the hardware
+    // Subscribe to bsp driver to receive Errors from the bsp hardware
     r_bsp->subscribe_all_errors(
         [this](const Everest::error::Error& error) {
             if (modify_error_bsp(error, true)) {
@@ -33,6 +35,52 @@ ErrorHandling::ErrorHandling(const std::unique_ptr<evse_board_supportIntf>& _r_b
                 }
             }
         });
+
+    // Subscribe to connector lock to receive errors from connector lock hardware
+    if (r_connector_lock.size() > 0) {
+        r_connector_lock[0]->subscribe_all_errors(
+            [this](const Everest::error::Error& error) {
+                if (modify_error_connector_lock(error, true)) {
+                    // signal to charger a new error has been set
+                    signal_error();
+                };
+            },
+            [this](const Everest::error::Error& error) {
+                modify_error_connector_lock(error, false);
+
+                if (active_errors.all_cleared()) {
+                    // signal to charger that all errors are cleared now
+                    signal_all_errors_cleared();
+                    // clear errors with HLC stack
+                    if (hlc) {
+                        r_hlc[0]->call_reset_error();
+                    }
+                }
+            });
+    }
+
+    // Subscribe to ac_rcd to receive errors from AC RCD hardware
+    if (r_ac_rcd.size() > 0) {
+        r_ac_rcd[0]->subscribe_all_errors(
+            [this](const Everest::error::Error& error) {
+                if (modify_error_ac_rcd(error, true)) {
+                    // signal to charger a new error has been set
+                    signal_error();
+                };
+            },
+            [this](const Everest::error::Error& error) {
+                modify_error_ac_rcd(error, false);
+
+                if (active_errors.all_cleared()) {
+                    // signal to charger that all errors are cleared now
+                    signal_all_errors_cleared();
+                    // clear errors with HLC stack
+                    if (hlc) {
+                        r_hlc[0]->call_reset_error();
+                    }
+                }
+            });
+    }
 }
 
 void ErrorHandling::raise_overcurrent_error(const std::string& description) {
@@ -190,6 +238,88 @@ bool ErrorHandling::modify_error_bsp(const Everest::error::Error& error, bool ac
         if (hlc && active) {
             r_hlc[0]->call_send_error(types::iso15118_charger::EvseError::Error_Malfunction);
         }
+    } else if (error_type == "evse_board_support/VendorError") {
+        active_errors.bsp.VendorError = active;
+        if (hlc && active) {
+            r_hlc[0]->call_send_error(types::iso15118_charger::EvseError::Error_Malfunction);
+        }
+    } else {
+        return false; // Error does not stop charging, ignored here
+    }
+    return true; // Error stops charging
+};
+
+bool ErrorHandling::modify_error_connector_lock(const Everest::error::Error& error, bool active) {
+    const std::string& error_type = error.type;
+
+    if (active) {
+        EVLOG_error << "Raised error " << error_type << ": " << error.description << " (" << error.message << ")";
+    } else {
+        EVLOG_info << "Cleared error " << error_type << ": " << error.description << " (" << error.message << ")";
+    }
+
+    if (error_type == "connector_lock/ConnectorLockCapNotCharged") {
+        active_errors.connector_lock.ConnectorLockCapNotCharged = active;
+    } else if (error_type == "connector_lock/ConnectorLockUnexpectedClose") {
+        active_errors.connector_lock.ConnectorLockUnexpectedClose = active;
+    } else if (error_type == "connector_lock/ConnectorLockUnexpectedOpen") {
+        active_errors.connector_lock.ConnectorLockUnexpectedOpen = active;
+    } else if (error_type == "connector_lock/ConnectorLockFailedLock") {
+        active_errors.connector_lock.ConnectorLockFailedLock = active;
+    } else if (error_type == "connector_lock/ConnectorLockFailedUnlock") {
+        active_errors.connector_lock.ConnectorLockFailedUnlock = active;
+    } else if (error_type == "connector_lock/MREC1ConnectorLockFailure") {
+        active_errors.connector_lock.MREC1ConnectorLockFailure = active;
+    } else if (error_type == "connector_lock/VendorError") {
+        active_errors.connector_lock.VendorError = active;
+        if (hlc && active) {
+            r_hlc[0]->call_send_error(types::iso15118_charger::EvseError::Error_Malfunction);
+        }
+    } else {
+        return false; // Error does not stop charging, ignored here
+    }
+    return true; // Error stops charging
+};
+
+bool ErrorHandling::modify_error_ac_rcd(const Everest::error::Error& error, bool active) {
+    const std::string& error_type = error.type;
+
+    if (active) {
+        EVLOG_error << "Raised error " << error_type << ": " << error.description << " (" << error.message << ")";
+    } else {
+        EVLOG_info << "Cleared error " << error_type << ": " << error.description << " (" << error.message << ")";
+    }
+
+    if (error_type == "ac_rcd/MREC2GroundFailure") {
+        active_errors.ac_rcd.MREC2GroundFailure = active;
+        if (hlc && active) {
+            r_hlc[0]->call_send_error(types::iso15118_charger::EvseError::Error_RCD);
+        }
+    } else if (error_type == "ac_rcd/VendorError") {
+        active_errors.ac_rcd.VendorError = active;
+        if (hlc && active) {
+            r_hlc[0]->call_send_error(types::iso15118_charger::EvseError::Error_Malfunction);
+        }
+    } else if (error_type == "ac_rcd/Selftest") {
+        active_errors.ac_rcd.Selftest = active;
+        if (hlc && active) {
+            r_hlc[0]->call_send_error(types::iso15118_charger::EvseError::Error_Malfunction);
+        }
+    } else if (error_type == "ac_rcd/AC") {
+        active_errors.ac_rcd.AC = active;
+        if (hlc && active) {
+            r_hlc[0]->call_send_error(types::iso15118_charger::EvseError::Error_RCD);
+        }
+    } else if (error_type == "ac_rcd/DC") {
+        active_errors.ac_rcd.DC = active;
+        if (hlc && active) {
+            r_hlc[0]->call_send_error(types::iso15118_charger::EvseError::Error_RCD);
+        }
+    } else if (error_type == "ac_rcd/VendorError") {
+        active_errors.ac_rcd.VendorError = active;
+        if (hlc && active) {
+            r_hlc[0]->call_send_error(types::iso15118_charger::EvseError::Error_Malfunction);
+        }
     } else {
         return false; // Error does not stop charging, ignored here
     }
@@ -207,9 +337,6 @@ bool ErrorHandling::modify_error_evse_manager(const std::string& error_type, boo
         return false; // Error does not stop charging, ignored here
     }
     return true; // Error stops charging
-
-    // missing:
-    // r_hlc[0]->call_set_RCD_Error(false);
 };
 
 } // namespace module
