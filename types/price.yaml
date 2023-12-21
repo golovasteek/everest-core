@@ -20,8 +20,7 @@ types:
       # 051, Armenian Dram, ARMENIA
       - AMD
       # 532, Netherlands Antillean Guilder, CURAÇAO
-      - ANG
-      # 532, Netherlands Antillean Guilder, SINT MAARTEN (DUTCH PART)
+      # SINT MAARTEN (DUTCH PART)
       - ANG
       # 973, Kwanza, ANGOLA
       - AOA
@@ -78,9 +77,8 @@ types:
       - CDF
       # 947, WIR Euro, SWITZERLAND
       - CHE
-      # 756, Swiss Franc, LIECHTENSTEIN
-      - CHF
       # 756, Swiss Franc, SWITZERLAND
+      # LIECHTENSTEIN
       - CHF
       # 948, WIR Franc, SWITZERLAND
       - CHW
@@ -107,10 +105,8 @@ types:
       # 262, Djibouti Franc, DJIBOUTI
       - DJF
       # 208, Danish Krone, DENMARK
-      - DKK
-      # 208, Danish Krone, FAROE ISLANDS (THE)
-      - DKK
-      # 208, Danish Krone, GREENLAND
+      # FAROE ISLANDS (THE)
+      # GREENLAND
       - DKK
       # 214, Dominican Peso, DOMINICAN REPUBLIC (THE)
       - DOP
@@ -194,9 +190,8 @@ types:
       - IDR
       # 376, New Israeli Sheqel, ISRAEL
       - ILS
-      # 356, Indian Rupee, BHUTAN
-      - INR
       # 356, Indian Rupee, INDIA
+      # BHUTAN
       - INR
       # 368, Iraqi Dinar, IRAQ
       - IQD
@@ -241,8 +236,7 @@ types:
       # 434, Libyan Dinar, LIBYA
       - LYD
       # 504, Moroccan Dirham, MOROCCO
-      - MAD
-      # 504, Moroccan Dirham, WESTERN SAHARA
+      # WESTERN SAHARA
       - MAD
       # 498, Moldovan Leu, MOLDOVA (THE REPUBLIC OF)
       - MDL
@@ -448,10 +442,8 @@ types:
       # 886, Yemeni Rial, YEMEN
       - YER
       # 710, Rand, LESOTHO
-      - ZAR
-      # 710, Rand, NAMIBIA
-      - ZAR
-      # 710, Rand, SOUTH AFRICA
+      # NAMIBIA
+      # SOUTH AFRICA
       - ZAR
       # 967, Zambian Kwacha, ZAMBIA
       - ZMW
