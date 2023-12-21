@@ -775,21 +775,23 @@ function error_DiodeFault(mod, raise) {
 }
 
 function error_ac_rcd_MREC2GroundFailure(mod, raise) {
+
   if (raise && !active_errors.ac_rcd_MREC2GroundFailure) {
-    mod.provides.ac_rcd.raise.ac_rcd_MREC2GroundFailure('Simulated fault event', 'High');
+    mod.provides.rcd.raise.ac_rcd_MREC2GroundFailure('Simulated fault event', 'High');
     active_errors.ac_rcd_MREC2GroundFailure = true;
   } else if (!raise && active_errors.ac_rcd_MREC2GroundFailure) {
-    mod.provides.ac_rcd.request_clear_all_of_type.ac_rcd_MREC2GroundFailure();
+
+    mod.provides.rcd.request_clear_all_of_type.ac_rcd_MREC2GroundFailure();
     active_errors.ac_rcd_MREC2GroundFailure = false;
   }
 }
 
 function error_ac_rcd_VendorError(mod, raise) {
   if (raise && !active_errors.ac_rcd_VendorError) {
-    mod.provides.ac_rcd.raise.ac_rcd_VendorError('Simulated fault event', 'High');
+    mod.provides.rcd.raise.ac_rcd_VendorError('Simulated fault event', 'High');
     active_errors.ac_rcd_VendorError = true;
   } else if (!raise && active_errors.ac_rcd_VendorError) {
-    mod.provides.ac_rcd.request_clear_all_of_type.ac_rcd_VendorError();
+    mod.provides.rcd.request_clear_all_of_type.ac_rcd_VendorError();
     active_errors.ac_rcd_VendorError = false;
   }
 }
@@ -797,30 +799,30 @@ function error_ac_rcd_VendorError(mod, raise) {
 
 function error_ac_rcd_Selftest(mod, raise) {
   if (raise && !active_errors.ac_rcd_Selftest) {
-    mod.provides.ac_rcd.raise.ac_rcd_Selftest('Simulated fault event', 'High');
+    mod.provides.rcd.raise.ac_rcd_Selftest('Simulated fault event', 'High');
     active_errors.ac_rcd_Selftest = true;
   } else if (!raise && active_errors.ac_rcd_Selftest) {
-    mod.provides.ac_rcd.request_clear_all_of_type.ac_rcd_Selftest();
+    mod.provides.rcd.request_clear_all_of_type.ac_rcd_Selftest();
     active_errors.ac_rcd_Selftest = false;
   }
 }
 
 function error_ac_rcd_AC(mod, raise) {
   if (raise && !active_errors.ac_rcd_AC) {
-    mod.provides.ac_rcd.raise.ac_rcd_AC('Simulated fault event', 'High');
+    mod.provides.rcd.raise.ac_rcd_AC('Simulated fault event', 'High');
     active_errors.ac_rcd_AC = true;
   } else if (!raise && active_errors.ac_rcd_AC) {
-    mod.provides.ac_rcd.request_clear_all_of_type.ac_rcd_AC();
+    mod.provides.rcd.request_clear_all_of_type.ac_rcd_AC();
     active_errors.ac_rcd_AC = false;
   }
 }
 
 function error_ac_rcd_DC(mod, raise) {
   if (raise && !active_errors.ac_rcd_DC) {
-    mod.provides.ac_rcd.raise.ac_rcd_DC('Simulated fault event', 'High');
+    mod.provides.rcd.raise.ac_rcd_DC('Simulated fault event', 'High');
     active_errors.ac_rcd_DC = true;
   } else if (!raise && active_errors.ac_rcd_DC) {
-    mod.provides.ac_rcd.request_clear_all_of_type.ac_rcd_DC();
+    mod.provides.rcd.request_clear_all_of_type.ac_rcd_DC();
     active_errors.ac_rcd_DC = false;
   }
 }
@@ -870,7 +872,7 @@ function error_lock_ConnectorLockFailedUnlock(mod, raise) {
   if (raise && !active_errors.lock_ConnectorLockFailedUnlock) {
     mod.provides.connector_lock.raise.connector_lock_ConnectorLockFailedUnlock('Simulated fault event', 'High');
     active_errors.lock_ConnectorLockFailedUnlock = true;
-  } else if (!raise && active_errors.ConnectorLockFailedUnlock) {
+  } else if (!raise && active_errors.lock_ConnectorLockFailedUnlock) {
     mod.provides.connector_lock.request_clear_all_of_type.connector_lock_ConnectorLockFailedUnlock();
     active_errors.lock_ConnectorLockFailedUnlock = false;
   }
@@ -881,7 +883,7 @@ function error_lock_MREC1ConnectorLockFailure(mod, raise) {
   if (raise && !active_errors.lock_MREC1ConnectorLockFailure) {
     mod.provides.connector_lock.raise.connector_lock_MREC1ConnectorLockFailure('Simulated fault event', 'High');
     active_errors.lock_MREC1ConnectorLockFailure = true;
-  } else if (!raise && active_errors.MREC1ConnectorLockFailure) {
+  } else if (!raise && active_errors.lock_MREC1ConnectorLockFailure) {
     mod.provides.connector_lock.request_clear_all_of_type.connector_lock_MREC1ConnectorLockFailure();
     active_errors.lock_MREC1ConnectorLockFailure = false;
   }
@@ -891,7 +893,7 @@ function error_lock_VendorError(mod, raise) {
   if (raise && !active_errors.lock_VendorError) {
     mod.provides.connector_lock.raise.connector_lock_VendorError('Simulated fault event', 'High');
     active_errors.lock_VendorError = true;
-  } else if (!raise && active_errors.VendorError) {
+  } else if (!raise && active_errors.lock_VendorError) {
     mod.provides.connector_lock.request_clear_all_of_type.connector_lock_VendorError();
     active_errors.lock_VendorError = false;
   }

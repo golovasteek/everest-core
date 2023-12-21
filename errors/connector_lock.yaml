@@ -26,8 +26,8 @@ errors:
       so we will use this error to report EVSE side lock failures. It is probably a mistake in the MREC definition.
   - name: VendorError
     description: >-
-      Vendor specific error code. Will stop charging session. More details can be given in string parameter.
+      Vendor specific error code. Will stop charging session.
   - name: VendorWarning
     description: >-
-      Vendor specific error code. Charging may continue. More details can be given in string parameter.
+      Vendor specific error code. Charging may continue.
  

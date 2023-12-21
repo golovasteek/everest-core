@@ -83,6 +83,9 @@ active_modules:
       ac_rcd:
         - implementation_id: rcd
           module_id: connector_1_powerpath
+      connector_lock:
+        - implementation_id: connector_lock
+          module_id: connector_1_powerpath
     module: EvseManager
     telemetry:
       id: 1
