@@ -470,6 +470,9 @@ void Charger::runStateMachine() {
                         signalEvent(types::evse_manager::SessionEventEnum::ChargingResumed);
                     }
 
+                    // Allow another wake-up sequence
+                    legacy_wakeup_done = false;
+
                     bsp->allow_power_on(true, types::evse_board_support::Reason::FullPowerCharging);
                     // make sure we are enabling PWM
                     if (hlc_use_5percent_current_session)
@@ -542,9 +545,6 @@ void Charger::runStateMachine() {
 
                 if (initialize_state) {
                     signalEvent(types::evse_manager::SessionEventEnum::ChargingPausedEV);
-                    // bsp->allow_power_on(true, types::evse_board_support::Reason::FullPowerCharging);
-                    //  make sure we are enabling PWM
-                    // update_pwm_now(ampereToDutyCycle(getMaxCurrent()));
                 } else {
                     // update PWM if it has changed and 5 seconds have passed since last update
                     if (!errors_prevent_charging()) {
@@ -1398,8 +1398,9 @@ void Charger::bcb_toggle_detect_start_pulse() {
 
 // call this on C->B transitions
 void Charger::bcb_toggle_detect_stop_pulse() {
-    if (!hlc_bcb_sequence_started)
+    if (!hlc_bcb_sequence_started) {
         return;
+    }
 
     // This is probably and end of BCB toggle, verify it was not too long or too short
     auto pulse_length = std::chrono::steady_clock::now() - hlc_ev_pause_start_of_bcb;

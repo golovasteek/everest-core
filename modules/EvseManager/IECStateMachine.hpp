@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 - 2021 Pionix GmbH and Contributors to EVerest
+// Copyright 2023 Pionix GmbH and Contributors to EVerest
 
 /*
  The IECStateMachine class provides an adapter between the board support package driver (in a seperate module) and the
@@ -119,6 +119,8 @@ private:
 
     std::atomic_bool three_phases{true};
     std::atomic_bool locked{false};
+
+    std::atomic_bool enabled{false};
 };
 
 } // namespace module

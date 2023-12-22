@@ -25,6 +25,7 @@
 #include <generated/interfaces/ac_rcd/Interface.hpp>
 #include <generated/interfaces/connector_lock/Interface.hpp>
 #include <generated/interfaces/evse_board_support/Interface.hpp>
+#include <generated/interfaces/evse_manager/Implementation.hpp>
 #include <generated/interfaces/evse_manager/Interface.hpp>
 #include <sigslot/signal.hpp>
 
@@ -105,7 +106,8 @@ public:
     explicit ErrorHandling(const std::unique_ptr<evse_board_supportIntf>& r_bsp,
                            const std::vector<std::unique_ptr<ISO15118_chargerIntf>>& r_hlc,
                            const std::vector<std::unique_ptr<connector_lockIntf>>& r_connector_lock,
-                           const std::vector<std::unique_ptr<ac_rcdIntf>>& r_ac_rcd);
+                           const std::vector<std::unique_ptr<ac_rcdIntf>>& r_ac_rcd,
+                           const std::unique_ptr<evse_managerImplBase>& _p_evse);
 
     // Signal for internal events type
     sigslot::signal<> signal_error;
@@ -122,6 +124,7 @@ private:
     const std::vector<std::unique_ptr<ISO15118_chargerIntf>>& r_hlc;
     const std::vector<std::unique_ptr<connector_lockIntf>>& r_connector_lock;
     const std::vector<std::unique_ptr<ac_rcdIntf>>& r_ac_rcd;
+    const std::unique_ptr<evse_managerImplBase>& p_evse;
 
     bool modify_error_bsp(const Everest::error::Error& error, bool active);
     bool modify_error_connector_lock(const Everest::error::Error& error, bool active);

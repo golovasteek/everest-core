@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2923 Pionix GmbH and Contributors to EVerest
+// Copyright 2023 Pionix GmbH and Contributors to EVerest
 
 #include "IECStateMachine.hpp"
 
@@ -75,8 +75,12 @@ IECStateMachine::IECStateMachine(const std::unique_ptr<evse_board_supportIntf>& 
 
     // Subscribe to bsp driver to receive BspEvents from the hardware
     r_bsp->subscribe_event([this](const types::board_support_common::BspEvent event) {
-        // feed into state machine
-        process_bsp_event(event);
+        if (enabled) {
+            // feed into state machine
+            process_bsp_event(event);
+        } else {
+            EVLOG_info << "Ignoring BSP Event, BSP is not enabled yet.";
+        }
     });
 }
 
@@ -187,7 +191,8 @@ std::queue<CPEvent> IECStateMachine::state_machine() {
     case RawCPState::C:
         connector_lock();
         // Table A.6: Sequence 1.2 Plug-in
-        if (last_cp_state == RawCPState::A || (!car_plugged_in && last_cp_state == RawCPState::F)) {
+        if (last_cp_state == RawCPState::A || last_cp_state == RawCPState::Disabled ||
+            (!car_plugged_in && last_cp_state == RawCPState::F)) {
             events.push(CPEvent::CarPluggedIn);
             EVLOG_info << "Detected simplified mode.";
             ev_simplified_mode = true;
@@ -366,6 +371,7 @@ void IECStateMachine::setup(bool three_phases, bool has_ventilation, std::string
 
 // enable/disable the charging port and CP signal
 void IECStateMachine::enable(bool en) {
+    enabled = en;
     r_bsp->call_enable(en);
 }
 

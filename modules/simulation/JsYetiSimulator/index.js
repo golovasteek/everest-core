@@ -19,7 +19,7 @@ const Event_PowerOff = 9;
 var module_id;
 let global_info;
 
-var active_errors = {
+let active_errors = {
   DiodeFault: false,
   BrownOut: false,
   EnergyManagement: false,
@@ -55,10 +55,31 @@ var active_errors = {
   lock_ConnectorLockFailedUnlock: false,
   lock_MREC1ConnectorLockFailure: false,
   lock_VendorError: false,
-}
+};
 
 function publish_ac_nr_of_phases_available(mod, n) {
   mod.provides.board_support.publish.ac_nr_of_phases_available(n);
+}
+
+function read_pp_ampacity(mod) {
+  let pp_resistor = mod.simulation_data.pp_resistor;
+  if (pp_resistor < 80.0 || pp_resistor > 2460) {
+    evlog.error(`PP resistor value "${pp_resistor}" Ohm seems to be outside the allowed range.`);
+    return "None"
+  }
+
+  // PP resistor value in spec, use a conservative interpretation of the resistance ranges
+  if (pp_resistor > 936.0 && pp_resistor <= 2460.0) {
+    return "A_13";
+  } else if (pp_resistor > 308.0 && pp_resistor <= 936.0) {
+    return "A_20";
+  } else if (pp_resistor > 140.0 && pp_resistor <= 308.0) {
+    return "A_32";
+  } else if (pp_resistor > 80.0 && pp_resistor <= 140.0) {
+    return "A_63";
+  }
+
+  return "None";
 }
 
 boot_module(async ({
@@ -1251,23 +1272,3 @@ function simulate_powermeter(mod) {
   };
 }
 
-function read_pp_ampacity(mod) {
-  let pp_resistor = mod.simulation_data.pp_resistor;
-  if (pp_resistor < 80.0 || pp_resistor > 2460) {
-    evlog.error(`PP resistor value "${pp_resistor}" Ohm seems to be outside the allowed range.`);
-    return "None"
-  }
-
-  // PP resistor value in spec, use a conservative interpretation of the resistance ranges
-  if (pp_resistor > 936.0 && pp_resistor <= 2460.0) {
-    return "A_13";
-  } else if (pp_resistor > 308.0 && pp_resistor <= 936.0) {
-    return "A_20";
-  } else if (pp_resistor > 140.0 && pp_resistor <= 308.0) {
-    return "A_32";
-  } else if (pp_resistor > 80.0 && pp_resistor <= 140.0) {
-    return "A_63";
-  }
-
-  return "None";
-}

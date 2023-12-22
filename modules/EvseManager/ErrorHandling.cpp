@@ -8,8 +8,9 @@ namespace module {
 ErrorHandling::ErrorHandling(const std::unique_ptr<evse_board_supportIntf>& _r_bsp,
                              const std::vector<std::unique_ptr<ISO15118_chargerIntf>>& _r_hlc,
                              const std::vector<std::unique_ptr<connector_lockIntf>>& _r_connector_lock,
-                             const std::vector<std::unique_ptr<ac_rcdIntf>>& _r_ac_rcd) :
-    r_bsp(_r_bsp), r_hlc(_r_hlc), r_connector_lock(_r_connector_lock), r_ac_rcd(_r_ac_rcd) {
+                             const std::vector<std::unique_ptr<ac_rcdIntf>>& _r_ac_rcd,
+                             const std::unique_ptr<evse_managerImplBase>& _p_evse) :
+    r_bsp(_r_bsp), r_hlc(_r_hlc), r_connector_lock(_r_connector_lock), r_ac_rcd(_r_ac_rcd), p_evse(_p_evse) {
 
     if (r_hlc.size() > 0) {
         hlc = true;
@@ -85,7 +86,7 @@ ErrorHandling::ErrorHandling(const std::unique_ptr<evse_board_supportIntf>& _r_b
 
 void ErrorHandling::raise_overcurrent_error(const std::string& description) {
     // raise externally
-    // FIXME raise_evse_manager_MREC4OverCurrentFailure(description);
+    p_evse->raise_evse_manager_MREC4OverCurrentFailure("Slow overcurrent detected", Everest::error::Severity::High);
 
     if (modify_error_evse_manager("evse_manager/MREC4OverCurrentFailure", true)) {
         // signal to charger a new error has been set
@@ -95,7 +96,7 @@ void ErrorHandling::raise_overcurrent_error(const std::string& description) {
 
 void ErrorHandling::clear_overcurrent_error() {
     // clear externally
-    // FIXME clear_evse_manager_MREC4OverCurrentFailure();
+    p_evse->request_clear_all_evse_manager_MREC4OverCurrentFailure();
 
     modify_error_evse_manager("evse_manager/MREC4OverCurrentFailure", false);
 
@@ -246,7 +247,7 @@ bool ErrorHandling::modify_error_bsp(const Everest::error::Error& error, bool ac
     } else {
         return false; // Error does not stop charging, ignored here
     }
-    return true; // Error stops charging
+    return true;      // Error stops charging
 };
 
 bool ErrorHandling::modify_error_connector_lock(const Everest::error::Error& error, bool active) {
@@ -278,7 +279,7 @@ bool ErrorHandling::modify_error_connector_lock(const Everest::error::Error& err
     } else {
         return false; // Error does not stop charging, ignored here
     }
-    return true; // Error stops charging
+    return true;      // Error stops charging
 };
 
 bool ErrorHandling::modify_error_ac_rcd(const Everest::error::Error& error, bool active) {
@@ -315,15 +316,10 @@ bool ErrorHandling::modify_error_ac_rcd(const Everest::error::Error& error, bool
         if (hlc && active) {
             r_hlc[0]->call_send_error(types::iso15118_charger::EvseError::Error_RCD);
         }
-    } else if (error_type == "ac_rcd/VendorError") {
-        active_errors.ac_rcd.VendorError = active;
-        if (hlc && active) {
-            r_hlc[0]->call_send_error(types::iso15118_charger::EvseError::Error_Malfunction);
-        }
     } else {
         return false; // Error does not stop charging, ignored here
     }
-    return true; // Error stops charging
+    return true;      // Error stops charging
 };
 
 bool ErrorHandling::modify_error_evse_manager(const std::string& error_type, bool active) {
@@ -336,7 +332,7 @@ bool ErrorHandling::modify_error_evse_manager(const std::string& error_type, boo
     } else {
         return false; // Error does not stop charging, ignored here
     }
-    return true; // Error stops charging
+    return true;      // Error stops charging
 };
 
 } // namespace module

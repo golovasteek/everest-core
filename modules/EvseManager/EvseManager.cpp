@@ -83,7 +83,8 @@ void EvseManager::init() {
 
 void EvseManager::ready() {
     bsp = std::unique_ptr<IECStateMachine>(new IECStateMachine(r_bsp));
-    error_handling = std::unique_ptr<ErrorHandling>(new ErrorHandling(r_bsp, r_hlc, r_connector_lock, r_ac_rcd));
+    error_handling =
+        std::unique_ptr<ErrorHandling>(new ErrorHandling(r_bsp, r_hlc, r_connector_lock, r_ac_rcd, p_evse));
 
     hw_capabilities = r_bsp->call_get_hw_capabilities();
 
