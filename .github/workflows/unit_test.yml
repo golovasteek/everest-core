@@ -25,5 +25,5 @@ jobs:
       - name: Test mainfests
         run: |
           cd ${{ github.workspace }}
-          python3 -m pytest tests/manifests_test/*.py
+          python3 -m pytest tests/manifest_test/*.py
       
