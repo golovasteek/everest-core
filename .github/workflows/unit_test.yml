@@ -23,5 +23,7 @@ jobs:
       - name: Install deps
         run: pip3 install pytest
       - name: Test mainfests
-        run: python3 -m pytest tests/manifests_test/*.py
+        run: |
+          cd ${{ github.workspace }}
+          python3 -m pytest tests/manifests_test/*.py
       
